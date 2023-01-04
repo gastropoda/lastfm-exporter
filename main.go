@@ -21,8 +21,8 @@ func main() {
 	api_secret := viper.GetString("ApiSecret")
 
 	api := lastfm.New(api_key, api_secret)
-	result, _ := api.Artist.GetTopTracks(lastfm.P{"artist": "Avicii"})
+	result, _ := api.User.GetRecentTracks(lastfm.P{"user": "femistofel"})
 	for _, track := range result.Tracks {
-		fmt.Println(track.Name)
+		fmt.Println(track.Artist.Name, "::", track.Name)
 	}
 }
