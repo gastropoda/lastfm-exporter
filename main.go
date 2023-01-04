@@ -2,10 +2,49 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/shkh/lastfm-go/lastfm"
 	"github.com/spf13/viper"
 )
+
+var lastfmTrackPlays = promauto.NewCounterVec(prometheus.CounterOpts{
+	Name: "lastfm_track_plays",
+	Help: "Count each play of a track",
+}, []string{
+	"artist",
+	"album",
+	"track",
+})
+
+func syncStats(api *lastfm.Api, user string) {
+	from := 0
+	go func() {
+		for {
+			result, _ := api.User.GetRecentTracks(lastfm.P{
+				"user": user,
+				"from": from + 1,
+			})
+			for _, track := range result.Tracks {
+				if track.NowPlaying != "true" {
+					continue
+				}
+
+				fmt.Println(track.NowPlaying, "::", track.Artist.Name, "::", track.Album.Name, "::", track.Name)
+				lastfmTrackPlays.With(prometheus.Labels{
+					"artist": track.Artist.Name,
+					"album":  track.Album.Name,
+					"track":  track.Name,
+				}).Inc()
+			}
+			time.Sleep(10 * time.Second)
+		}
+	}()
+}
 
 func main() {
 	viper.SetConfigName("config")
@@ -22,8 +61,8 @@ func main() {
 	user := viper.GetString("lastfm.user")
 
 	api := lastfm.New(api_key, api_secret)
-	result, _ := api.User.GetRecentTracks(lastfm.P{"user": user})
-	for _, track := range result.Tracks {
-		fmt.Println(track.Artist.Name, "::", track.Name)
-	}
+	syncStats(api, user)
+
+	http.Handle("/metrics", promhttp.Handler())
+	http.ListenAndServe(":2112", nil)
 }
