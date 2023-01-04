@@ -17,11 +17,12 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
-	api_key := viper.GetString("ApiKey")
-	api_secret := viper.GetString("ApiSecret")
+	api_key := viper.GetString("lastfm.api.key")
+	api_secret := viper.GetString("lastfm.api.secret")
+	user := viper.GetString("lastfm.user")
 
 	api := lastfm.New(api_key, api_secret)
-	result, _ := api.User.GetRecentTracks(lastfm.P{"user": "femistofel"})
+	result, _ := api.User.GetRecentTracks(lastfm.P{"user": user})
 	for _, track := range result.Tracks {
 		fmt.Println(track.Artist.Name, "::", track.Name)
 	}
