@@ -40,7 +40,8 @@ func syncStats(api *lastfm.Api, user string) {
 					"track":  track.Name,
 				}).Set(1)
 			}
-			time.Sleep(10 * time.Second)
+			time.Sleep(5 * time.Second)
+			lastfmTrackPlays.Reset()
 		}
 	}()
 }
