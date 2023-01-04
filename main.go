@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var lastfmTrackPlays = promauto.NewCounterVec(prometheus.CounterOpts{
+var lastfmTrackPlays = promauto.NewGaugeVec(prometheus.GaugeOpts{
 	Name: "lastfm_track_plays",
 	Help: "Count each play of a track",
 }, []string{
@@ -39,7 +39,7 @@ func syncStats(api *lastfm.Api, user string) {
 					"artist": track.Artist.Name,
 					"album":  track.Album.Name,
 					"track":  track.Name,
-				}).Inc()
+				}).Set(1)
 			}
 			time.Sleep(10 * time.Second)
 		}
