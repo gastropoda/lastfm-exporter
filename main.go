@@ -34,7 +34,6 @@ func syncStats(api *lastfm.Api, user string) {
 					continue
 				}
 
-				fmt.Println(track.NowPlaying, "::", track.Artist.Name, "::", track.Album.Name, "::", track.Name)
 				lastfmTrackPlays.With(prometheus.Labels{
 					"artist": track.Artist.Name,
 					"album":  track.Album.Name,
